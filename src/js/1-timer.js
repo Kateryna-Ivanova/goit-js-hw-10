@@ -101,5 +101,3 @@ timerInput.value = '';
 
 
 
-// Перевірка
-console.log("6")

@@ -15,7 +15,7 @@ function onSubmit(event) {
     const radioBtn = promiseForm.elements.state.value;
     //очищення вибору
     event.target.reset();
-    // Створення проміса
+    // Створення проміса з вказаною затримкою (delay)
     const promise = new Promise((resolve, reject) => {
     setTimeout(() => {
       if (radioBtn === 'fulfilled') {
@@ -47,6 +47,3 @@ promise.then(value => {
 
 
 
-
-// Перевірка
-console.log("54")
