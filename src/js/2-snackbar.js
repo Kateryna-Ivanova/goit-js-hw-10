@@ -43,3 +43,10 @@ promise.then(value => {
       });
     });
 };
+
+
+
+
+
+// Перевірка
+console.log("54")

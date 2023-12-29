@@ -98,3 +98,8 @@ function convertMs(ms) {
   return { days, hours, minutes, seconds };
 }
 timerInput.value = '';
+
+
+
+// Перевірка
+console.log("6")
