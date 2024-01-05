@@ -3,19 +3,12 @@ import 'flatpickr/dist/flatpickr.min.css';
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
-const btnStart = document.querySelector('[data-start]');
-const timerInput = document.querySelector('#datetime-picker');
+const btnStart = document.querySelector("[data-start]");
+const timerInput = document.getElementById("datetime-picker");
 
 
-const day = document.querySelector('[data-days]');
-const hours = document.querySelector('[data-hours]');
-const minutes = document.querySelector('[data-minutes]');
-const seconds = document.querySelector('[data-seconds]');
+let userSelectedDate = null;
 
-btnStart.addEventListener('click', onClick);
-
-// let userSelectedDate = null;
-let userSelectedDate
 
 // бібліотека flatpickr( вибір дати)
 const options = {
@@ -24,80 +17,87 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    const selectedData = selectedDates[0];
-    const initialTimer = selectedData.getTime() - new Date().getTime();
-    convertMs(initialTimer);
-
-      if (selectedData < new Date()) {
-        //використання бібліотеки iziToast(виводить повідомнення)
+    const selectedDate = selectedDates[0];
+    if (selectedDate < new Date()) {
+//використання бібліотеки iziToast(виводить повідомнення)
       iziToast.error({
         position: 'topRight',
           message: 'Please choose a date in the future',
            backgroundColor: 'red',
       });
-      btnStart.setAttribute('disabled', true);
-    }
-    else {
-      btnStart.removeAttribute('disabled');
-      userSelectedDate = selectedData;
+      btnStart.disabled = true;
+    } else {
+      btnStart.disabled = false;
+      timerInput.disabled = false;
+      userSelectedDate = selectedDate;
     }
   },
 };
+
 flatpickr(timerInput, options);
 
+document.addEventListener('DOMContentLoaded', () => {
+  btnStart.disabled = true;
+});
+btnStart.addEventListener("click", startTimer);
 
-// кнопка start
-function onClick(){
-    const selectedTime = userSelectedDate.getTime();
-  timerInput.setAttribute('disabled', true);
-    btnStart.setAttribute('disabled', true);
-
+function startTimer() {
+  btnStart.disabled = true;
+  timerInput.disabled = true;
   const timerInterval = setInterval(() => {
-    let remainingTime = selectedTime - Date.now();
-    const numberOfTimer = convertMs(remainingTime);
-    if (remainingTime <= 0) {
-      iziToast.info({
+    const remainingTime = calculateTimeLeft(userSelectedDate);
+    updateTimer(remainingTime);
+    if (remainingTime.total <= 0) {
+       // clearInterval() Скасування інтервалу
+      clearInterval(timerInterval);
+      iziToast.success({
         position: 'topRight',
           message: 'Time is up',
           backgroundColor:'green'
       });
-        // clearInterval() Скасування інтервалу
-      clearInterval(timerInterval);
-    } else {
-      day.textContent = `${numberOfTimer.days}`;
-      hours.textContent = `${numberOfTimer.hours}`;
-      minutes.textContent = `${numberOfTimer.minutes}`;
-      seconds.textContent = `${numberOfTimer.seconds}`;
     }
   }, 1000);
 }
+
+function calculateTimeLeft(endDate) {
+  const difference = endDate - new Date();
+  const timeLeft = convertMs(difference);
+  return timeLeft;
+}
+
 function convertMs(ms) {
-  // Number of milliseconds per unit of time
   const second = 1000;
   const minute = second * 60;
   const hour = minute * 60;
   const day = hour * 24;
 
-  // Remaining days
-  const days = Math.floor(ms / day)
-    .toString()
-    .padStart(2, '0');
-  // Remaining hours
-  const hours = Math.floor((ms % day) / hour)
-    .toString()
-    .padStart(2, '0');
-  // Remaining minutes
-  const minutes = Math.floor(((ms % day) % hour) / minute)
-    .toString()
-    .padStart(2, '0');
-  // Remaining seconds
-  const seconds = Math.floor((((ms % day) % hour) % minute) / second)
-    .toString()
-    .padStart(2, '0');
+  const days = Math.floor(ms / day);
+  const hours = Math.floor((ms % day) / hour);
+  const minutes = Math.floor(((ms % day) % hour) / minute);
+  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
 
-  return { days, hours, minutes, seconds };
+  const nonNegativeDays = Math.max(0, days);
+  const nonNegativeHours = Math.max(0, hours);
+  const nonNegativeMinutes = Math.max(0, minutes);
+  const nonNegativeSeconds = Math.max(0, seconds);
+
+return {
+    days: nonNegativeDays,
+    hours: nonNegativeHours,
+    minutes: nonNegativeMinutes,
+    seconds: nonNegativeSeconds,
+    total: ms
+  };
+
 }
-timerInput.value = '';
 
-
-
+function updateTimer({ days, hours, minutes, seconds }) {
+  document.querySelector("[data-days]").textContent = addLeadingZero(days);
+  document.querySelector("[data-hours]").textContent = addLeadingZero(hours);
+  document.querySelector("[data-minutes]").textContent = addLeadingZero(minutes);
+  document.querySelector("[data-seconds]").textContent = addLeadingZero(seconds);
+}
+// якщо воно містить менше двох символів, на початку числа додаємо 0.
+function addLeadingZero(value) {
+  return value < 10 ? `0${value}` : value;
+}

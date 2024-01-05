@@ -60,6 +60,7 @@ button {
   gap: 10px;
   border-radius: 8px;
   background: #4e75ff;
+  border: none;
 
   color: #fff;
 
@@ -73,7 +74,8 @@ button {
 button:disabled {
   background: #cfcfcf;
   color: #989898;
-
+  border: none;
+  cursor: pointer;
   font-family: Montserrat;
   font-size: 16px;
   font-style: normal;
@@ -132,4 +134,7 @@ button:disabled {
   font-style: normal;
   font-weight: 500;
   line-height: 24px; /* 150% */
+}
+button:not([disabled]):hover {
+  background: #6c8cff;
 }
